@@ -342,7 +342,10 @@ def home():
 @app.route('/jobs')
 def get_jobs():
     """Returnează joburile cu filtre opționale"""
-    city = normalize_text(request.args.get('city', '')).lower()
+    # Parsează cities (comma-separated: "cluj,ilfov,suceava")
+    city_param = request.args.get('city', '')
+    cities = [normalize_text(c.strip()).lower() for c in city_param.split(',') if c.strip()] if city_param else []
+
     keywords = normalize_text(request.args.get('keywords', '')).lower()
     source = request.args.get('source', '').lower()
     search = normalize_text(request.args.get('search', '')).lower()
@@ -350,9 +353,12 @@ def get_jobs():
     # Filtrează joburi cu linkuri murdare (OLX cu query params)
     filtered = [j for j in all_jobs if not ('olx.ro' in j.get('link', '') and '?' in j.get('link', ''))]
 
-    # Filtrare după oraș (cu normalizare diacritice)
-    if city and city != 'all':
-        filtered = [j for j in filtered if city in normalize_text(j.get('location', '')).lower()]
+    # Filtrare după orașe (multi-select: OR logic - orice dintre cities)
+    if cities:
+        filtered = [j for j in filtered if any(
+            city in normalize_text(j.get('location', '')).lower()
+            for city in cities
+        )]
 
     # Filtrare după cuvinte cheie
     if keywords:
