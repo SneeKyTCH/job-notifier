@@ -186,6 +186,10 @@ def scrape_olx():
                 if '/oferta/loc-de-munca/' not in link.lower():
                     continue
 
+                # Curață link-ul de query parameters ciudate
+                if '?' in link:
+                    link = link.split('?')[0]
+
                 # Extrage locația din text-ul item-ului
                 location = 'România'
                 text_to_search = (title + ' ' + item.get_text()).lower()
@@ -199,7 +203,14 @@ def scrape_olx():
                 company_el = item.find(class_=lambda c: c and ('seller' in c.lower() or 'company' in c.lower()))
                 company = company_el.get_text(strip=True) if company_el else ''
 
-                jobs.append({'id': link, 'title': title, 'company': company,
+                # Dacă nu găsit company, caută în text job titlu pentru companie
+                if not company and ' - ' in title:
+                    company = title.split(' - ')[-1].strip()
+
+                # ID unic pe bază de URL (fără query params)
+                job_id = link.split('/')[-1].split('.')[0] if '/' in link else link
+
+                jobs.append({'id': job_id, 'title': title, 'company': company,
                              'location': location, 'source': 'OLX', 'link': link})
             except:
                 continue
