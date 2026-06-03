@@ -97,20 +97,27 @@ def scrape_ejobs():
                 company_el = item.find(class_=lambda c: c and 'company' in c.lower())
                 company = company_el.get_text(strip=True) if company_el else ''
 
-                # Extrage locația din multiple surse
+                # Extrage locația din URL job-ului (eJobs include județul în URL)
                 location = 'România'
-                location_el = item.find(class_=lambda c: c and ('location' in c.lower() or 'city' in c.lower() or 'judet' in c.lower() or 'oras' in c.lower()))
-                if location_el:
-                    location = location_el.get_text(strip=True)
-                else:
-                    # Încearcă din text-ul item-ului
-                    text = item.get_text(strip=True)
-                    # Caută județe cunoscute în text
-                    counties = ['București', 'Ilfov', 'Prahova', 'Constanța', 'Cluj', 'Brașov', 'Galați', 'Sibiu', 'Vaslui', 'Botoșani', 'Bacău', 'Bihor', 'Maramureș', 'Satu Mare', 'Suceava']
-                    for county in counties:
-                        if county.lower() in text.lower():
-                            location = county
-                            break
+                try:
+                    # eJobs URLs conțin județul: /locuri-de-munca/bacau/..., /locuri-de-munca/remote/...
+                    url_parts = link.lower().split('/')
+                    if 'locuri-de-munca' in url_parts:
+                        idx = url_parts.index('locuri-de-munca')
+                        if idx + 1 < len(url_parts) and url_parts[idx + 1] not in ['', 'remote']:
+                            potential_county = url_parts[idx + 1]
+                            # Mapează URL slugs to county names
+                            slug_to_county = {
+                                'bacau': 'Bacău', 'budapest': 'București', 'cluj': 'Cluj', 'timisoara': 'Timișoara',
+                                'brașov': 'Brașov', 'sibiu': 'Sibiu', 'constanta': 'Constanța', 'galati': 'Galați',
+                                'iași': 'Iași', 'oradea': 'Oradea', 'pitești': 'Pitești', 'brăila': 'Brăila',
+                                'craiova': 'Craiova', 'ploiești': 'Ploiești', 'piatra neamt': 'Piatra Neamț',
+                                'buzau': 'Buzău', 'satu mare': 'Satu Mare', 'vaslui': 'Vaslui', 'dej': 'Dej'
+                            }
+                            if potential_county in slug_to_county:
+                                location = slug_to_county[potential_county]
+                except:
+                    pass
 
                 jobs.append({'id': link, 'title': title, 'company': company,
                              'location': location, 'source': 'eJobs', 'link': link})
