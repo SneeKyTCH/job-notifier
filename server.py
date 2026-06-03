@@ -38,7 +38,16 @@ def load_cache():
     if os.path.exists(JOBS_CACHE_FILE):
         try:
             with open(JOBS_CACHE_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                jobs = json.load(f)
+                # Filtrează joburi cu linkuri neoptimizate (query params)
+                cleaned = []
+                for j in jobs:
+                    link = j.get('link', '')
+                    # Accepta doar linkuri curate (fara query params ciudate pentru job listings)
+                    if '?search_reason=' in link or '?search%7C' in link:
+                        continue
+                    cleaned.append(j)
+                return cleaned
         except:
             pass
     return []
