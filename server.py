@@ -182,8 +182,8 @@ def scrape_olx():
                 if not link.startswith('http'):
                     link = 'https://www.olx.ro' + link
 
-                # Skipează linkuri nevalide
-                if '/home/' in link or link.count('/') < 5:
+                # Skipează linkuri nevalide - doar /oferta/loc-de-munca/ sunt valide
+                if '/oferta/loc-de-munca/' not in link.lower():
                     continue
 
                 # Extrage locația din text-ul item-ului
