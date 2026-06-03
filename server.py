@@ -96,8 +96,22 @@ def scrape_ejobs():
                     link = 'https://www.ejobs.ro' + link
                 company_el = item.find(class_=lambda c: c and 'company' in c.lower())
                 company = company_el.get_text(strip=True) if company_el else ''
-                location_el = item.find(class_=lambda c: c and ('location' in c.lower() or 'city' in c.lower()))
-                location = location_el.get_text(strip=True) if location_el else 'România'
+
+                # Extrage locația din multiple surse
+                location = 'România'
+                location_el = item.find(class_=lambda c: c and ('location' in c.lower() or 'city' in c.lower() or 'judet' in c.lower() or 'oras' in c.lower()))
+                if location_el:
+                    location = location_el.get_text(strip=True)
+                else:
+                    # Încearcă din text-ul item-ului
+                    text = item.get_text(strip=True)
+                    # Caută județe cunoscute în text
+                    counties = ['București', 'Ilfov', 'Prahova', 'Constanța', 'Cluj', 'Brașov', 'Galați', 'Sibiu', 'Vaslui', 'Botoșani', 'Bacău', 'Bihor', 'Maramureș', 'Satu Mare', 'Suceava']
+                    for county in counties:
+                        if county.lower() in text.lower():
+                            location = county
+                            break
+
                 jobs.append({'id': link, 'title': title, 'company': company,
                              'location': location, 'source': 'eJobs', 'link': link})
             except:
@@ -128,9 +142,24 @@ def scrape_olx():
                 link = a['href']
                 if not link.startswith('http'):
                     link = 'https://www.olx.ro' + link
+
+                # Extrage locația
+                location = 'România'
                 location_el = item.find('p', attrs={'data-testid': 'location-date'}) or \
                               item.find(class_=lambda c: c and 'location' in c.lower())
-                location = location_el.get_text(strip=True).split('-')[0].strip() if location_el else 'România'
+                if location_el:
+                    loc_text = location_el.get_text(strip=True).split('-')[0].strip()
+                    if loc_text and loc_text.lower() != 'romania':
+                        location = loc_text
+                else:
+                    # Caută județe în text-ul item-ului
+                    text = item.get_text(strip=True)
+                    counties = ['București', 'Ilfov', 'Prahova', 'Constanța', 'Cluj', 'Brașov', 'Galați', 'Sibiu', 'Vaslui', 'Botoșani', 'Bacău', 'Bihor', 'Maramureș', 'Satu Mare', 'Suceava']
+                    for county in counties:
+                        if county.lower() in text.lower():
+                            location = county
+                            break
+
                 jobs.append({'id': link, 'title': title, 'company': '',
                              'location': location, 'source': 'OLX', 'link': link})
             except:
