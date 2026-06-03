@@ -4,7 +4,7 @@ SERVER pentru Job Notifier
 Face scraping pe site-uri și oferă joburile către aplicația mobilă
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
@@ -254,10 +254,36 @@ def home():
 
 @app.route('/jobs')
 def get_jobs():
-    """Returnează TOATE joburile vreodată găsite"""
+    """Returnează joburile cu filtre opționale"""
+    city = request.args.get('city', '').lower()
+    keywords = request.args.get('keywords', '').lower()
+    source = request.args.get('source', '').lower()
+    search = request.args.get('search', '').lower()
+
+    filtered = all_jobs
+
+    # Filtrare după oraș
+    if city and city != 'all':
+        filtered = [j for j in filtered if city in j.get('location', '').lower()]
+
+    # Filtrare după cuvinte cheie
+    if keywords:
+        keyword_list = [k.strip() for k in keywords.split(',')]
+        filtered = [j for j in filtered if any(k in j.get('title', '').lower() or k in j.get('company', '').lower() for k in keyword_list)]
+
+    # Filtrare după sursă
+    if source and source != 'all':
+        filtered = [j for j in filtered if j.get('source', '').lower() == source]
+
+    # Căutare text (titlu + companie + locație)
+    if search:
+        filtered = [j for j in filtered if search in j.get('title', '').lower() or
+                   search in j.get('company', '').lower() or
+                   search in j.get('location', '').lower()]
+
     return jsonify({
-        'jobs': all_jobs,
-        'total': len(all_jobs),
+        'jobs': filtered,
+        'total': len(filtered),
         'last_update': last_update
     })
 
