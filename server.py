@@ -71,8 +71,13 @@ def get_soup(url, timeout=(5, 8)):
 def scrape_ejobs():
     """Extrage anunțurile de pe eJobs"""
     jobs = []
-    pages = ["https://www.ejobs.ro/locuri-de-munca",
-             "https://www.ejobs.ro/locuri-de-munca/remote"]
+    pages = [
+        "https://www.ejobs.ro/locuri-de-munca",
+        "https://www.ejobs.ro/locuri-de-munca/remote",
+        "https://www.ejobs.ro/locuri-de-munca?pagina=2",
+        "https://www.ejobs.ro/locuri-de-munca/remote?pagina=2",
+        "https://www.ejobs.ro/locuri-de-munca?pagina=3",
+    ]
     for url in pages:
         soup = get_soup(url)
         if not soup:
@@ -102,29 +107,34 @@ def scrape_ejobs():
 def scrape_olx():
     """Extrage anunțurile de pe OLX"""
     jobs = []
-    url = "https://www.olx.ro/locuri-de-munca/"
-    soup = get_soup(url)
-    if not soup:
-        return jobs
-    for item in soup.select('[data-cy="l-card"], div.offer-wrapper, li.offer-item'):
-        try:
-            a = item.find('a', href=True)
-            if not a:
-                continue
-            title_el = item.find('h6') or item.find('h4') or item.find('strong') or a
-            title = title_el.get_text(strip=True)
-            if len(title) < 4:
-                continue
-            link = a['href']
-            if not link.startswith('http'):
-                link = 'https://www.olx.ro' + link
-            location_el = item.find('p', attrs={'data-testid': 'location-date'}) or \
-                          item.find(class_=lambda c: c and 'location' in c.lower())
-            location = location_el.get_text(strip=True).split('-')[0].strip() if location_el else 'România'
-            jobs.append({'id': link, 'title': title, 'company': '',
-                         'location': location, 'source': 'OLX', 'link': link})
-        except:
+    urls = [
+        "https://www.olx.ro/locuri-de-munca/",
+        "https://www.olx.ro/locuri-de-munca/?page=2",
+        "https://www.olx.ro/locuri-de-munca/?page=3",
+    ]
+    for url in urls:
+        soup = get_soup(url)
+        if not soup:
             continue
+        for item in soup.select('[data-cy="l-card"], div.offer-wrapper, li.offer-item'):
+            try:
+                a = item.find('a', href=True)
+                if not a:
+                    continue
+                title_el = item.find('h6') or item.find('h4') or item.find('strong') or a
+                title = title_el.get_text(strip=True)
+                if len(title) < 4:
+                    continue
+                link = a['href']
+                if not link.startswith('http'):
+                    link = 'https://www.olx.ro' + link
+                location_el = item.find('p', attrs={'data-testid': 'location-date'}) or \
+                              item.find(class_=lambda c: c and 'location' in c.lower())
+                location = location_el.get_text(strip=True).split('-')[0].strip() if location_el else 'România'
+                jobs.append({'id': link, 'title': title, 'company': '',
+                             'location': location, 'source': 'OLX', 'link': link})
+            except:
+                continue
     return jobs
 
 def update_jobs():
