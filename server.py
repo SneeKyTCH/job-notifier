@@ -202,23 +202,25 @@ def refresh():
         'total': len(all_jobs)
     })
 
+# ============== STARTUP ==============
+
+# Încarcă cache și pornește background updater la startup
+all_jobs = load_cache()
+print(f"📂 Cache încărcat: {len(all_jobs)} joburi")
+
+# Prima actualizare
+update_jobs()
+
+# Pornește actualizarea în fundal
+updater = threading.Thread(target=background_updater, daemon=True)
+updater.start()
+
 # ============== START ==============
 
 if __name__ == '__main__':
     print("="*60)
-    print("🚀 JOB NOTIFIER SERVER")
+    print("🚀 JOB NOTIFIER SERVER (Local Mode)")
     print("="*60)
-
-    # Încarcă joburile din cache anterior
-    all_jobs = load_cache()
-    print(f"📂 Cache încărcat: {len(all_jobs)} joburi anterioare\n")
-
-    # Prima actualizare
-    update_jobs()
-
-    # Pornește actualizarea în fundal
-    updater = threading.Thread(target=background_updater, daemon=True)
-    updater.start()
 
     # Port dinamic (Render oferă PORT, default 5000 local)
     port = int(os.environ.get("PORT", 5000))
