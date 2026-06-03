@@ -51,86 +51,80 @@ def save_cache(jobs):
 
 # ============== SCRAPING ==============
 
-def scrape_ejobs(url):
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                  'AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/120.0.0.0 Safari/537.36',
+    'Accept-Language': 'ro-RO,ro;q=0.9,en;q=0.8',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+}
+
+def get_soup(url, timeout=(5, 8)):
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=timeout)
+        r.encoding = 'utf-8'
+        return BeautifulSoup(r.content, 'html.parser')
+    except Exception as e:
+        print(f"   [EROARE] {url}: {e}")
+        return None
+
+def scrape_ejobs():
     """Extrage anunțurile de pe eJobs"""
     jobs = []
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        job_containers = soup.find_all('div', class_='job-item') or \
-                        soup.find_all('a', class_='absolute-link-overlay') or \
-                        soup.find_all('article')
-
-        for i, container in enumerate(job_containers[:20]):
+    pages = ["https://www.ejobs.ro/locuri-de-munca",
+             "https://www.ejobs.ro/locuri-de-munca/remote"]
+    for url in pages:
+        soup = get_soup(url)
+        if not soup:
+            continue
+        for item in soup.select('article.job-item, div[class*="job-item"], li[class*="job"]'):
             try:
-                title_elem = container.find('h2') or container.find('a')
-                if title_elem:
-                    title = title_elem.get_text(strip=True)
-                    if len(title) < 5:
-                        continue
-                    link = container.find('a')
-                    link = link['href'] if link and link.get('href') else url
-                    if not link.startswith('http'):
-                        link = 'https://www.ejobs.ro' + link
-
-                    jobs.append({
-                        'id': f'ejobs_{i}_{int(time.time())}',
-                        'title': title,
-                        'company': 'eJobs',
-                        'location': 'Remote' if 'remote' in url else 'Bacău',
-                        'source': 'eJobs',
-                        'link': link
-                    })
+                a = item.find('a', href=True)
+                title_el = item.find('h2') or item.find('h3') or (a if a else None)
+                if not title_el:
+                    continue
+                title = title_el.get_text(strip=True)
+                if len(title) < 4:
+                    continue
+                link = a['href'] if a else url
+                if not link.startswith('http'):
+                    link = 'https://www.ejobs.ro' + link
+                company_el = item.find(class_=lambda c: c and 'company' in c.lower())
+                company = company_el.get_text(strip=True) if company_el else ''
+                location_el = item.find(class_=lambda c: c and ('location' in c.lower() or 'city' in c.lower()))
+                location = location_el.get_text(strip=True) if location_el else 'România'
+                jobs.append({'id': link, 'title': title, 'company': company,
+                             'location': location, 'source': 'eJobs', 'link': link})
             except:
                 continue
-    except Exception as e:
-        print(f"[EROARE eJobs] {e}")
     return jobs
 
-def scrape_olx(url):
+def scrape_olx():
     """Extrage anunțurile de pe OLX"""
     jobs = []
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        job_containers = soup.find_all('div', class_='itembox') or \
-                        soup.find_all('a', class_='item') or \
-                        soup.find_all('li', class_='aditem')
-
-        for i, container in enumerate(job_containers[:20]):
-            try:
-                title_elem = container.find('h2') or container.find('strong') or container.find('a')
-                if title_elem:
-                    title = title_elem.get_text(strip=True)
-                    if len(title) < 5:
-                        continue
-                    link = container.find('a')
-                    link = link['href'] if link and link.get('href') else url
-                    if not link.startswith('http'):
-                        link = 'https://www.olx.ro' + link
-
-                    jobs.append({
-                        'id': f'olx_{i}_{int(time.time())}',
-                        'title': title,
-                        'company': 'OLX',
-                        'location': 'Bacău',
-                        'source': 'OLX',
-                        'link': link
-                    })
-            except:
+    url = "https://www.olx.ro/locuri-de-munca/"
+    soup = get_soup(url)
+    if not soup:
+        return jobs
+    for item in soup.select('[data-cy="l-card"], div.offer-wrapper, li.offer-item'):
+        try:
+            a = item.find('a', href=True)
+            if not a:
                 continue
-    except Exception as e:
-        print(f"[EROARE OLX] {e}")
+            title_el = item.find('h6') or item.find('h4') or item.find('strong') or a
+            title = title_el.get_text(strip=True)
+            if len(title) < 4:
+                continue
+            link = a['href']
+            if not link.startswith('http'):
+                link = 'https://www.olx.ro' + link
+            location_el = item.find('p', attrs={'data-testid': 'location-date'}) or \
+                          item.find(class_=lambda c: c and 'location' in c.lower())
+            location = location_el.get_text(strip=True).split('-')[0].strip() if location_el else 'România'
+            jobs.append({'id': link, 'title': title, 'company': '',
+                         'location': location, 'source': 'OLX', 'link': link})
+        except:
+            continue
     return jobs
 
 def update_jobs():
@@ -142,15 +136,18 @@ def update_jobs():
     saved_jobs = load_cache()
     existing_ids = {job['id'] for job in saved_jobs}
 
+    # Scrape joburi
     new_jobs_found = []
-    for url in URLs:
-        print(f"   🌐 {url}")
-        if 'olx' in url:
-            jobs = scrape_olx(url)
-        else:
-            jobs = scrape_ejobs(url)
-        print(f"      └─ {len(jobs)} joburi")
-        new_jobs_found.extend(jobs)
+
+    print(f"   🌐 eJobs...", end=' ', flush=True)
+    jobs = scrape_ejobs()
+    print(f"{len(jobs)} joburi")
+    new_jobs_found.extend(jobs)
+
+    print(f"   🌐 OLX...", end=' ', flush=True)
+    jobs = scrape_olx()
+    print(f"{len(jobs)} joburi")
+    new_jobs_found.extend(jobs)
 
     # Adaugă joburi noi (evita duplicatele)
     for job in new_jobs_found:
