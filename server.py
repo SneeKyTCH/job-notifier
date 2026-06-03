@@ -182,6 +182,10 @@ def scrape_olx():
                 if not link.startswith('http'):
                     link = 'https://www.olx.ro' + link
 
+                # Skipează linkuri nevalide
+                if '/home/' in link or link.count('/') < 5:
+                    continue
+
                 # Extrage locația din text-ul item-ului
                 location = 'România'
                 text_to_search = (title + ' ' + item.get_text()).lower()
@@ -191,7 +195,11 @@ def scrape_olx():
                         location = county_name
                         break
 
-                jobs.append({'id': link, 'title': title, 'company': '',
+                # Extrage compania din item (e.g. de pe OLX nu e evident, dar încearcă)
+                company_el = item.find(class_=lambda c: c and ('seller' in c.lower() or 'company' in c.lower()))
+                company = company_el.get_text(strip=True) if company_el else ''
+
+                jobs.append({'id': link, 'title': title, 'company': company,
                              'location': location, 'source': 'OLX', 'link': link})
             except:
                 continue
