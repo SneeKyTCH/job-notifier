@@ -44,8 +44,8 @@ def load_cache():
     return []
 
 def save_cache(jobs):
-    """Salvează toate joburile în cache (maxim 10000)"""
-    jobs_to_save = jobs[-10000:]
+    """Salvează toate joburile în cache (maxim 500)"""
+    jobs_to_save = jobs[-500:]
     with open(JOBS_CACHE_FILE, 'w', encoding='utf-8') as f:
         json.dump(jobs_to_save, f, ensure_ascii=False, indent=2)
 
@@ -82,9 +82,6 @@ def scrape_ejobs():
     pages = [
         "https://www.ejobs.ro/locuri-de-munca",
         "https://www.ejobs.ro/locuri-de-munca/remote",
-        "https://www.ejobs.ro/locuri-de-munca?pagina=2",
-        "https://www.ejobs.ro/locuri-de-munca/remote?pagina=2",
-        "https://www.ejobs.ro/locuri-de-munca?pagina=3",
     ]
     for url in pages:
         soup = get_soup(url)
@@ -144,7 +141,6 @@ def scrape_olx():
     urls = [
         "https://www.olx.ro/locuri-de-munca/",
         "https://www.olx.ro/locuri-de-munca/?page=2",
-        "https://www.olx.ro/locuri-de-munca/?page=3",
     ]
 
     # Lista completa de județe și orașe
