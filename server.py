@@ -223,6 +223,16 @@ def saved_jobs():
     """Saved jobs endpoint"""
     return jsonify({'jobs': [], 'total': 0})
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    """Logout endpoint"""
+    return jsonify({'message': 'Logged out successfully'})
+
+@app.route('/applications', methods=['GET', 'POST'])
+def applications():
+    """Applications endpoint"""
+    return jsonify({'applications': [], 'total': 0})
+
 @app.route('/')
 def home():
     return jsonify({
