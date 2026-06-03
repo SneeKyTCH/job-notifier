@@ -347,7 +347,8 @@ def get_jobs():
     source = request.args.get('source', '').lower()
     search = normalize_text(request.args.get('search', '')).lower()
 
-    filtered = all_jobs
+    # Filtrează joburi cu linkuri murdare (OLX cu query params)
+    filtered = [j for j in all_jobs if not ('olx.ro' in j.get('link', '') and '?' in j.get('link', ''))]
 
     # Filtrare după oraș (cu normalizare diacritice)
     if city and city != 'all':
