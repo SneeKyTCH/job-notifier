@@ -97,27 +97,32 @@ def scrape_ejobs():
                 company_el = item.find(class_=lambda c: c and 'company' in c.lower())
                 company = company_el.get_text(strip=True) if company_el else ''
 
-                # Extrage locația din URL job-ului (eJobs include județul în URL)
+                # Extrage locația din text-ul job-ului (titlu, companie, descriere)
                 location = 'România'
-                try:
-                    # eJobs URLs conțin județul: /locuri-de-munca/bacau/..., /locuri-de-munca/remote/...
-                    url_parts = link.lower().split('/')
-                    if 'locuri-de-munca' in url_parts:
-                        idx = url_parts.index('locuri-de-munca')
-                        if idx + 1 < len(url_parts) and url_parts[idx + 1] not in ['', 'remote']:
-                            potential_county = url_parts[idx + 1]
-                            # Mapează URL slugs to county names
-                            slug_to_county = {
-                                'bacau': 'Bacău', 'budapest': 'București', 'cluj': 'Cluj', 'timisoara': 'Timișoara',
-                                'brașov': 'Brașov', 'sibiu': 'Sibiu', 'constanta': 'Constanța', 'galati': 'Galați',
-                                'iași': 'Iași', 'oradea': 'Oradea', 'pitești': 'Pitești', 'brăila': 'Brăila',
-                                'craiova': 'Craiova', 'ploiești': 'Ploiești', 'piatra neamt': 'Piatra Neamț',
-                                'buzau': 'Buzău', 'satu mare': 'Satu Mare', 'vaslui': 'Vaslui', 'dej': 'Dej'
-                            }
-                            if potential_county in slug_to_county:
-                                location = slug_to_county[potential_county]
-                except:
-                    pass
+                text_to_search = (title + ' ' + company + ' ' + item.get_text()).lower()
+
+                # Lista completa de județe și orașe
+                counties = {
+                    'bucuresti': 'București', 'bucureşti': 'București', 'ilfov': 'Ilfov',
+                    'prahova': 'Prahova', 'constanta': 'Constanța', 'constanţa': 'Constanța',
+                    'cluj': 'Cluj', 'brasov': 'Brașov', 'brașov': 'Brașov', 'brașov': 'Brașov',
+                    'galati': 'Galați', 'galați': 'Galați', 'sibiu': 'Sibiu',
+                    'vaslui': 'Vaslui', 'botosani': 'Botoșani', 'botoşani': 'Botoșani',
+                    'bacau': 'Bacău', 'bacău': 'Bacău', 'bihor': 'Bihor',
+                    'maramures': 'Maramureș', 'maramureş': 'Maramureș', 'satu mare': 'Satu Mare',
+                    'suceava': 'Suceava', 'iasi': 'Iași', 'iași': 'Iași', 'buzau': 'Buzău',
+                    'arges': 'Argeș', 'argeş': 'Argeș', 'dolj': 'Dolj', 'olt': 'Olt',
+                    'gorj': 'Gorj', 'mehedinti': 'Mehedinți', 'teleorman': 'Teleorman',
+                    'giurgiu': 'Giurgiu', 'calarasi': 'Călărași', 'călărași': 'Călărași',
+                    'braila': 'Brăila', 'brăila': 'Brăila', 'tulcea': 'Tulcea',
+                    'harghita': 'Harghita', 'covasna': 'Covasna', 'mures': 'Mureș', 'mureş': 'Mureș',
+                    'timis': 'Timiș', 'timiş': 'Timiș', 'caras-severin': 'Caraș-Severin'
+                }
+
+                for county_slug, county_name in counties.items():
+                    if county_slug in text_to_search:
+                        location = county_name
+                        break
 
                 jobs.append({'id': link, 'title': title, 'company': company,
                              'location': location, 'source': 'eJobs', 'link': link})
@@ -133,6 +138,25 @@ def scrape_olx():
         "https://www.olx.ro/locuri-de-munca/?page=2",
         "https://www.olx.ro/locuri-de-munca/?page=3",
     ]
+
+    # Lista completa de județe și orașe
+    counties = {
+        'bucuresti': 'București', 'bucureşti': 'București', 'ilfov': 'Ilfov',
+        'prahova': 'Prahova', 'constanta': 'Constanța', 'constanţa': 'Constanța',
+        'cluj': 'Cluj', 'brasov': 'Brașov', 'brașov': 'Brașov', 'brașov': 'Brașov',
+        'galati': 'Galați', 'galați': 'Galați', 'sibiu': 'Sibiu',
+        'vaslui': 'Vaslui', 'botosani': 'Botoșani', 'botoşani': 'Botoșani',
+        'bacau': 'Bacău', 'bacău': 'Bacău', 'bihor': 'Bihor',
+        'maramures': 'Maramureș', 'maramureş': 'Maramureș', 'satu mare': 'Satu Mare',
+        'suceava': 'Suceava', 'iasi': 'Iași', 'iași': 'Iași', 'buzau': 'Buzău',
+        'arges': 'Argeș', 'argeş': 'Argeș', 'dolj': 'Dolj', 'olt': 'Olt',
+        'gorj': 'Gorj', 'mehedinti': 'Mehedinți', 'teleorman': 'Teleorman',
+        'giurgiu': 'Giurgiu', 'calarasi': 'Călărași', 'călărași': 'Călărași',
+        'braila': 'Brăila', 'brăila': 'Brăila', 'tulcea': 'Tulcea',
+        'harghita': 'Harghita', 'covasna': 'Covasna', 'mures': 'Mureș', 'mureş': 'Mureș',
+        'timis': 'Timiș', 'timiş': 'Timiș', 'caras-severin': 'Caraș-Severin'
+    }
+
     for url in urls:
         soup = get_soup(url)
         if not soup:
@@ -150,22 +174,14 @@ def scrape_olx():
                 if not link.startswith('http'):
                     link = 'https://www.olx.ro' + link
 
-                # Extrage locația
+                # Extrage locația din text-ul item-ului
                 location = 'România'
-                location_el = item.find('p', attrs={'data-testid': 'location-date'}) or \
-                              item.find(class_=lambda c: c and 'location' in c.lower())
-                if location_el:
-                    loc_text = location_el.get_text(strip=True).split('-')[0].strip()
-                    if loc_text and loc_text.lower() != 'romania':
-                        location = loc_text
-                else:
-                    # Caută județe în text-ul item-ului
-                    text = item.get_text(strip=True)
-                    counties = ['București', 'Ilfov', 'Prahova', 'Constanța', 'Cluj', 'Brașov', 'Galați', 'Sibiu', 'Vaslui', 'Botoșani', 'Bacău', 'Bihor', 'Maramureș', 'Satu Mare', 'Suceava']
-                    for county in counties:
-                        if county.lower() in text.lower():
-                            location = county
-                            break
+                text_to_search = (title + ' ' + item.get_text()).lower()
+
+                for county_slug, county_name in counties.items():
+                    if county_slug in text_to_search:
+                        location = county_name
+                        break
 
                 jobs.append({'id': link, 'title': title, 'company': '',
                              'location': location, 'source': 'OLX', 'link': link})
