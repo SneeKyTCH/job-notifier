@@ -59,6 +59,14 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 }
 
+def normalize_text(text):
+    """Normalizează text pentru comparație (elimină diacritice)"""
+    import unicodedata
+    if not text:
+        return ''
+    nfkd_form = unicodedata.normalize('NFKD', text)
+    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
 def get_soup(url, timeout=(5, 8)):
     try:
         r = requests.get(url, headers=HEADERS, timeout=timeout)
@@ -307,21 +315,23 @@ def home():
 @app.route('/jobs')
 def get_jobs():
     """Returnează joburile cu filtre opționale"""
-    city = request.args.get('city', '').lower()
-    keywords = request.args.get('keywords', '').lower()
+    city = normalize_text(request.args.get('city', '')).lower()
+    keywords = normalize_text(request.args.get('keywords', '')).lower()
     source = request.args.get('source', '').lower()
-    search = request.args.get('search', '').lower()
+    search = normalize_text(request.args.get('search', '')).lower()
 
     filtered = all_jobs
 
-    # Filtrare după oraș
+    # Filtrare după oraș (cu normalizare diacritice)
     if city and city != 'all':
-        filtered = [j for j in filtered if city in j.get('location', '').lower()]
+        filtered = [j for j in filtered if city in normalize_text(j.get('location', '')).lower()]
 
     # Filtrare după cuvinte cheie
     if keywords:
         keyword_list = [k.strip() for k in keywords.split(',')]
-        filtered = [j for j in filtered if any(k in j.get('title', '').lower() or k in j.get('company', '').lower() for k in keyword_list)]
+        filtered = [j for j in filtered if any(k in normalize_text(j.get('title', '')).lower() or
+                                                k in normalize_text(j.get('company', '')).lower()
+                                                for k in keyword_list)]
 
     # Filtrare după sursă
     if source and source != 'all':
@@ -329,9 +339,9 @@ def get_jobs():
 
     # Căutare text (titlu + companie + locație)
     if search:
-        filtered = [j for j in filtered if search in j.get('title', '').lower() or
-                   search in j.get('company', '').lower() or
-                   search in j.get('location', '').lower()]
+        filtered = [j for j in filtered if search in normalize_text(j.get('title', '')).lower() or
+                   search in normalize_text(j.get('company', '')).lower() or
+                   search in normalize_text(j.get('location', '')).lower()]
 
     return jsonify({
         'jobs': filtered,
