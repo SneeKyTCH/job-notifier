@@ -172,6 +172,24 @@ def background_updater():
 
 # ============== API ENDPOINTS ==============
 
+@app.route('/login', methods=['POST'])
+def login():
+    """Login endpoint - returnează token dummy"""
+    return jsonify({
+        'token': 'dummy-token-xyz',
+        'user_id': 1,
+        'message': 'Login successful'
+    })
+
+@app.route('/register', methods=['POST'])
+def register():
+    """Register endpoint - returnează token dummy"""
+    return jsonify({
+        'token': 'dummy-token-xyz',
+        'user_id': 1,
+        'message': 'Registration successful'
+    })
+
 @app.route('/')
 def home():
     return jsonify({
