@@ -355,10 +355,12 @@ def get_jobs():
 
     # Filtrare după orașe (multi-select: OR logic - orice dintre cities)
     if cities:
-        filtered = [j for j in filtered if any(
+        city_filtered = [j for j in filtered if any(
             city in normalize_text(j.get('location', '')).lower()
             for city in cities
         )]
+        # Dacă nu sunt joburi în județele selectate, arată din TOATĂ România
+        filtered = city_filtered if city_filtered else filtered
 
     # Filtrare după cuvinte cheie
     if keywords:
