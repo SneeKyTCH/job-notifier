@@ -371,17 +371,10 @@ def get_jobs():
 @app.route('/refresh')
 def refresh():
     """Forțează actualizarea joburilor"""
-    clear = request.args.get('clear', 'false').lower() == 'true'
-    if clear:
-        global all_jobs
-        all_jobs = []
-        if os.path.exists(JOBS_CACHE_FILE):
-            os.remove(JOBS_CACHE_FILE)
     update_jobs()
     return jsonify({
         'message': 'Joburi actualizate!',
-        'total': len(all_jobs),
-        'cleared': clear
+        'total': len(all_jobs)
     })
 
 # ============== STARTUP ==============
