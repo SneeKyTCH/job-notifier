@@ -200,7 +200,7 @@ def scrape_olx():
 def update_jobs():
     """Actualizează lista de joburi"""
     global all_jobs, last_update
-    print(f"\n🔄 Actualizez joburile... {datetime.now().strftime('%H:%M:%S')}")
+    print(f"[UPDATE] Actualizez joburile... {datetime.now().strftime('%H:%M:%S')}")
 
     # Încarcă joburile anterioare
     saved_jobs = load_cache()
@@ -209,12 +209,12 @@ def update_jobs():
     # Scrape joburi
     new_jobs_found = []
 
-    print(f"   🌐 eJobs...", end=' ', flush=True)
+    print(f"[eJobs]", end=' ', flush=True)
     jobs = scrape_ejobs()
     print(f"{len(jobs)} joburi")
     new_jobs_found.extend(jobs)
 
-    print(f"   🌐 OLX...", end=' ', flush=True)
+    print(f"[OLX]", end=' ', flush=True)
     jobs = scrape_olx()
     print(f"{len(jobs)} joburi")
     new_jobs_found.extend(jobs)
@@ -232,7 +232,7 @@ def update_jobs():
     save_cache(all_jobs)
 
     last_update = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-    print(f"✅ Total: {len(all_jobs)} joburi în cache\n")
+    print(f"[DONE] Total: {len(all_jobs)} joburi in cache\n")
 
 def background_updater():
     """Actualizează joburile periodic (la fiecare 30 min)"""
@@ -362,7 +362,7 @@ def refresh():
 
 # Încarcă cache și pornește background updater la startup
 all_jobs = load_cache()
-print(f"📂 Cache încărcat: {len(all_jobs)} joburi")
+print(f"[CACHE] Incarca: {len(all_jobs)} joburi")
 
 # Prima actualizare
 update_jobs()
@@ -375,15 +375,15 @@ updater.start()
 
 if __name__ == '__main__':
     print("="*60)
-    print("🚀 JOB NOTIFIER SERVER (Local Mode)")
+    print("[START] JOB NOTIFIER SERVER (Local Mode)")
     print("="*60)
 
     # Port dinamic (Render oferă PORT, default 5000 local)
     port = int(os.environ.get("PORT", 5000))
 
-    print("\n📡 Server pornit!")
-    print(f"🌐 http://0.0.0.0:{port}")
-    print("📱 Notează adresa IP/URL pentru aplicație\n")
+    print("\n[SERVER] Pornit!")
+    print(f"[URL] http://0.0.0.0:{port}")
+    print("[NOTE] Noteza adresa IP/URL pentru aplicatie\n")
 
     # Pornește serverul pe toate interfețele (accesibil din rețea)
     app.run(host='0.0.0.0', port=port, debug=False)
