@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+*.log
+jobs_cache.json
+job_cache.json
+node_modules/
+.venv/
+venv/
