@@ -118,22 +118,25 @@ def scrape_ejobs():
                 location = 'România'
                 text_to_search = (title + ' ' + company + ' ' + item.get_text()).lower()
 
-                # Lista completa de județe și orașe
+                # Lista completa de județe și orașe (cu variante fără diacritice)
                 counties = {
-                    'bucuresti': 'București', 'bucureşti': 'București', 'ilfov': 'Ilfov',
-                    'prahova': 'Prahova', 'constanta': 'Constanța', 'constanţa': 'Constanța',
-                    'cluj': 'Cluj', 'brasov': 'Brașov', 'brașov': 'Brașov', 'brașov': 'Brașov',
-                    'galati': 'Galați', 'galați': 'Galați', 'sibiu': 'Sibiu',
-                    'vaslui': 'Vaslui', 'botosani': 'Botoșani', 'botoşani': 'Botoșani',
-                    'bacau': 'Bacău', 'bacău': 'Bacău', 'bihor': 'Bihor',
-                    'maramures': 'Maramureș', 'maramureş': 'Maramureș', 'satu mare': 'Satu Mare',
-                    'suceava': 'Suceava', 'iasi': 'Iași', 'iași': 'Iași', 'buzau': 'Buzău',
-                    'arges': 'Argeș', 'argeş': 'Argeș', 'dolj': 'Dolj', 'olt': 'Olt',
+                    'bucuresti': 'București', 'bucuresti': 'București', 'ilfov': 'Ilfov',
+                    'prahova': 'Prahova', 'constanta': 'Constanța', 'constanta': 'Constanța',
+                    'cluj': 'Cluj', 'brasov': 'Brașov', 'brasov': 'Brașov', 'brașov': 'Brașov',
+                    'galati': 'Galați', 'galati': 'Galați', 'sibiu': 'Sibiu',
+                    'vaslui': 'Vaslui', 'botosani': 'Botoșani', 'botosani': 'Botoșani',
+                    'bacau': 'Bacău', 'bacau': 'Bacău', 'bihor': 'Bihor',
+                    'maramures': 'Maramureș', 'maramures': 'Maramureș', 'satu mare': 'Satu Mare',
+                    'suceava': 'Suceava', 'iasi': 'Iași', 'iasi': 'Iași', 'buzau': 'Buzău',
+                    'arges': 'Argeș', 'arges': 'Argeș', 'dolj': 'Dolj', 'olt': 'Olt',
                     'gorj': 'Gorj', 'mehedinti': 'Mehedinți', 'teleorman': 'Teleorman',
-                    'giurgiu': 'Giurgiu', 'calarasi': 'Călărași', 'călărași': 'Călărași',
-                    'braila': 'Brăila', 'brăila': 'Brăila', 'tulcea': 'Tulcea',
-                    'harghita': 'Harghita', 'covasna': 'Covasna', 'mures': 'Mureș', 'mureş': 'Mureș',
-                    'timis': 'Timiș', 'timiş': 'Timiș', 'caras-severin': 'Caraș-Severin'
+                    'giurgiu': 'Giurgiu', 'calarasi': 'Călărași', 'calarasi': 'Călărași',
+                    'braila': 'Brăila', 'braila': 'Brăila', 'tulcea': 'Tulcea',
+                    'harghita': 'Harghita', 'covasna': 'Covasna', 'mures': 'Mureș', 'mures': 'Mureș',
+                    'timis': 'Timiș', 'timis': 'Timiș', 'caras-severin': 'Caraș-Severin',
+                    'alba': 'Alba', 'arad': 'Arad', 'bistrita': 'Bistrița-Năsăud', 'dambovita': 'Dâmbovița',
+                    'hunedoara': 'Hunedoara', 'ialomita': 'Ialomita', 'neamt': 'Neamt', 'salaj': 'Salaj',
+                    'valcea': 'Vâlcea', 'vrancea': 'Vrancea'
                 }
 
                 for county_slug, county_name in counties.items():
