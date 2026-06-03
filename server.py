@@ -221,8 +221,12 @@ if __name__ == '__main__':
     updater = threading.Thread(target=background_updater, daemon=True)
     updater.start()
 
+    # Port dinamic (Render oferă PORT, default 5000 local)
+    port = int(os.environ.get("PORT", 5000))
+
     print("\n📡 Server pornit!")
-    print("📱 Notează adresa IP de mai jos pentru aplicație\n")
+    print(f"🌐 http://0.0.0.0:{port}")
+    print("📱 Notează adresa IP/URL pentru aplicație\n")
 
     # Pornește serverul pe toate interfețele (accesibil din rețea)
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)
