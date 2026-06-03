@@ -177,7 +177,7 @@ def login():
     """Login endpoint - returnează token dummy"""
     return jsonify({
         'token': 'dummy-token-xyz',
-        'user_id': 1,
+        'user': {'id': 1, 'username': 'user', 'email': 'user@example.com'},
         'message': 'Login successful'
     })
 
@@ -186,7 +186,7 @@ def register():
     """Register endpoint - returnează token dummy"""
     return jsonify({
         'token': 'dummy-token-xyz',
-        'user_id': 1,
+        'user': {'id': 1, 'username': 'user', 'email': 'user@example.com'},
         'message': 'Registration successful'
     })
 
