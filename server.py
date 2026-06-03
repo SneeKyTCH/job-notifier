@@ -199,6 +199,30 @@ def get_me():
         'email': 'user@example.com'
     })
 
+@app.route('/preferences', methods=['GET', 'POST'])
+def preferences():
+    """User preferences"""
+    return jsonify({
+        'city': '',
+        'keywords': '',
+        'email_alerts_enabled': True
+    })
+
+@app.route('/profile', methods=['GET'])
+def profile():
+    """User profile"""
+    return jsonify({
+        'id': 1,
+        'username': 'user',
+        'email': 'user@example.com',
+        'stats': {'saved': 0, 'applications': 0}
+    })
+
+@app.route('/saved-jobs', methods=['GET', 'POST', 'DELETE'])
+def saved_jobs():
+    """Saved jobs endpoint"""
+    return jsonify({'jobs': [], 'total': 0})
+
 @app.route('/')
 def home():
     return jsonify({
