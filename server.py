@@ -210,7 +210,6 @@ if __name__ == '__main__':
     print("="*60)
 
     # Încarcă joburile din cache anterior
-    global all_jobs
     all_jobs = load_cache()
     print(f"📂 Cache încărcat: {len(all_jobs)} joburi anterioare\n")
 
