@@ -190,6 +190,15 @@ def register():
         'message': 'Registration successful'
     })
 
+@app.route('/me', methods=['GET'])
+def get_me():
+    """Get current user profile"""
+    return jsonify({
+        'id': 1,
+        'username': 'user',
+        'email': 'user@example.com'
+    })
+
 @app.route('/')
 def home():
     return jsonify({
