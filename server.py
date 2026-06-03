@@ -39,12 +39,15 @@ def load_cache():
         try:
             with open(JOBS_CACHE_FILE, 'r', encoding='utf-8') as f:
                 jobs = json.load(f)
-                # Filtrează joburi cu linkuri neoptimizate (query params)
+                # Filtrează joburi cu linkuri neoptimizate (query params OLX)
                 cleaned = []
                 for j in jobs:
                     link = j.get('link', '')
-                    # Accepta doar linkuri curate (fara query params ciudate pentru job listings)
-                    if '?search_reason=' in link or '?search%7C' in link:
+                    # Rejecta OLX linkuri cu query params
+                    if 'olx.ro' in link and '?' in link:
+                        continue
+                    # Rejecta linkuri care nu sunt valide
+                    if link.startswith('http://bilka') or link.startswith('https://bilka'):
                         continue
                     cleaned.append(j)
                 return cleaned
